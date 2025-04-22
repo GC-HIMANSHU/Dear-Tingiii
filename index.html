@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday 🎉</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .puzzle-piece {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      cursor: grab;
+    }
+    .grid-box {
+      width: 100%;
+      max-width: 310px;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      background-color: white;
+      border-radius: 1rem;
+      padding: 5px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    #sliderWrapper {
+      transition: transform 0.6s ease-in-out;
+      display: flex;
+      width: 500vw;
+      height: 100vh;
+    }
+    .page {
+      width: 100vw;
+      height: 100vh;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .balloon {
+      width: 60px;
+      height: 80px;
+      border-radius: 50% 50% 45% 45%;
+      position: absolute;
+      background-size: cover;
+      background-position: center;
+      background-color: pink;
+      animation: floatUp 10s linear infinite;
+      cursor: pointer;
+      z-index: 1;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(-120vh); opacity: 0; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .dragging { opacity: 0.5; }
+    video {
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+    #loadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #9333ea;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .typewriter {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid;
+      animation: typing 4s steps(40, end), blink .75s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+  </style>
+</head>
+<body class="bg-purple-100 text-gray-800 font-sans">
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+  </div>
+
+  <audio id="popSound" src="Balloon Pop - Sound Effect #shorts.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="Ruth B - Dandelions  Karaoke Version.mp3" loop></audio>
+  <button onclick="toggleMusic()" class="fixed bottom-4 left-4 z-50 bg-purple-600 text-white px-4 py-2 rounded-full">🎵 Toggle Music</button>
+  <div id="sliderWrapper">
+    <body class="bg-purple-100 text-gray-800 font-sans overflow-hidden">
+      <audio id="popSound" src="Balloon Pop - Sound Effect #shorts.mp3" preload="auto"></audio>
+      <div id="sliderWrapper">
+         <!-- 🎵 Background Music -->
+      <audio id="bgMusic" src="Ruth B - Dandelions  Karaoke Version.mp3" loop></audio>
+        <!-- PAGE 1 -->
+        <div id="page1" class="page min-h-screen flex flex-col items-center justify-center p-8 text-center">
+          <h1 class="text-5xl font-extrabold text-white mb-4 drop-shadow-lg z-10">💜 Welcome to Your Birthday Surprise! 🎂</h1>
+          <div class="bg-white p-6 rounded-3xl shadow-lg max-w-xl z-10">
+            <p class="text-lg mb-4">Each page is a little piece of love, laughter, and memories:</p>
+            <ul class="text-left text-md mb-6 list-disc list-inside space-y-1">
+              <li><strong>Page 2:</strong> Solve a fun image puzzle</li>
+              <li><strong>Page 3:</strong> A countdown suprise</li>
+              <li><strong>Page 4:</strong> Relive beautiful memories through animations</li>
+              <li><strong>Page 5:</strong> A heartfelt note, just for you 💌</li>
+            </ul>
+            <p class="text-md">Pop as many balloons as the number of years you've turned😘</p>
+          </div>
+          <div id="balloonContainer" class="absolute inset-0 overflow-hidden z-0"></div>
+          <div class="absolute top-4 right-4 text-white font-bold text-lg z-20">Page 1 of 5</div>
+        </div>
+    
+        <!-- PAGE 2 (Puzzle Page) -->
+        <div id="page2" class="page min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <h1 class="text-4xl font-bold text-purple-700 mb-4">🧩 Solve the Puzzle!</h1>
+          <p class="mb-4">Drag and drop the pieces to form the full image.</p>
+          <p class="mb-4">To go to the next page solve the puzzle.</p>
+          <div id="puzzle" class="grid-box mb-4"></div>
+          <p id="successMsg" class="text-green-600 font-semibold hidden">🎉 You solved it! 🎉</p>
+          <button onclick="resetPuzzle()" class="mt-2 bg-pink-500 text-white px-4 py-2 rounded-full hover:bg-pink-600 transition">🔄 Reset Puzzle</button>
+    
+          <div id="teaserBox" class="hidden mt-6 bg-Light grey-100 border border-Light grey-300 p-6 rounded-xl shadow-md max-w-sm w-full">
+            <h2 class="text-xl font-semibold text-black-800 mb-2">👀 Hmm... Something’s waiting on the next page!</h2>
+            <p class="text-sm text-black-700 mb-4">We won’t spoil it, but it might make you smile 😉</p>
+            <button onclick="showPage(3)" class="bg-purple-500 text-white px-5 py-2 rounded-full hover:bg-purple-600 transition">
+              Next Page ➔
+            </button>
+          </div>
+          <div class="absolute top-4 right-4 text-purple-600 font-bold text-lg">Page 2 of 5</div>
+        </div>
+        <!-- PAGE 3 - Countdown Surprise -->
+    <div id="page3" class="page min-h-screen flex flex-col items-center justify-center p-6 text-center">
+      <h1 class="text-4xl font-bold text-purple-700 mb-4">⏳ A Little Countdown Surprise</h1>
+      <div class="bg-white p-6 rounded-3xl shadow-xl max-w-xl w-full flex flex-col items-center">
+        <p class="text-lg mb-4 text-gray-700">Wait for it... something special is coming your way! 💜</p>
+        <div id="countdown" class="text-6xl font-bold text-purple-600 mb-4">10</div>
+        <p id="revealMessage" class="text-lg text-black-700 hidden"><strong>Kesa laga mera majak😉</strong></p>
+        <button id="goToPage4Btn" onclick="showPage(4)" class="mt-6 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition hidden">
+          Go to Page 4 ➡️
+        </button>
+      </div>
+      <div class="absolute top-4 right-4 text-purple-600 font-bold text-lg">Page 3 of 5</div>
+    </div>
+    
+        <!-- PAGE 4 -->
+        <div id="page4" class="page min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <h1 class="text-4xl font-bold text-purple-700 mb-4">🎞️ Memory Lane</h1>
+          <div class="bg-white p-6 rounded-3xl shadow-xl max-w-xl w-full">
+            <p class="text-lg text-gray-700 mb-4">A little animation to celebrate your beautiful memories 💫</p>
+            <video controls class="rounded-lg w-full max-h-[60vh] object-contain">
+              <source src="WhatsApp Video 2025-04-22 at 23.30.27_f2b4f121.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <button onclick="showPage(5)" class="mt-6 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition">
+            Go to Final Page 💌
+          </button>
+          <div class="absolute top-4 right-4 text-purple-600 font-bold text-lg">Page 4 of 5</div>
+        </div>
+    
+        <!-- PAGE 5 -->
+        <div id="page5" class="page min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <h1 class="text-4xl font-bold text-purple-700 mb-4">💌 A Note from Sattebaaz</h1>
+          <div class="bg-white p-6 rounded-3xl shadow-xl max-w-2xl w-full">
+            <p class="text-lg text-gray-700 leading-relaxed">
+              To Disha, on Your Special Day 🎉
+     <br/><br/>
+              First of all Happyyy Birthdayyy! 🎂✨
+    I hope this day brings you loads of happiness, laughter, and everything you love including your favorite IPL team winning at least once .
+     💜<br/><br/>
+     Honestly, we haven’t shared too many deep conversations or crazy adventures yet, but over the last few weeks, I’ve felt really grateful to be included and especially to be accepted by you. It means a lot.
+    
+     I know your bond with your sister is super special and I’m just starting to be a small part of that picture. But I genuinely hope from today onward we can create more good memories.
+     
+     So here’s wishing you a year filled with Big wins on and off the Free Fire battlefield Endless laughter And beautiful surprises life throws your way 💫.
+     
+     Stay the fun kind and amazing person you are You deserve nothing less than the best
+     
+     Happy Birthday once again Disha!
+     Have a blast today and yes, cake photos are compulsory. 🎂📸
+     
+     
+            </p>
+            <p class="mt-4 text-gray-500 text-sm">— With all the love in the world 💕</p>
+          </div>
+          <button onclick="showPage(1)" class="mt-6 bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition">
+            🎈 Start Over
+          </button>
+          <div class="absolute top-4 right-4 text-purple-600 font-bold text-lg">Page 5 of 5</div>
+        </div>
+      </div>
+    
+    
+      </div>
+    
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+      const loadingScreen = document.getElementById("loadingScreen");
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        loadingScreen.style.display = "none";
+        showPage(1);
+      }, 1000);
+    });
+
+    function showPage(number) {
+      const wrapper = document.getElementById('sliderWrapper');
+      wrapper.style.transform = `translateX(${(number - 1) * -100}vw)`;
+      if (number === 2) resetPuzzle();
+    }
+
+    const balloonColors = ['cherry', 'white', 'pastel', 'navy'];
+    const colorMap = { cherry: '#DE3163', white: '#FFFFFF', pastel: '#77DD77', navy: '#000080' };
+    const balloonContainer = document.getElementById("balloonContainer");
+    const popSound = document.getElementById("popSound");
+    let popCount = 0;
+
+    for (let i = 0; i < 20; i++) {
+      const balloon = document.createElement("div");
+      balloon.classList.add("balloon");
+      const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+      balloon.style.backgroundColor = colorMap[color];
+      balloon.style.left = `${Math.random() * 100}vw`;
+      balloon.style.bottom = `-100px`;
+      balloon.style.animationDelay = `${Math.random() * 10}s`;
+      balloon.addEventListener("click", () => {
+        popSound.play();
+        balloon.remove();
+        popCount++;
+        if (popCount === 16) setTimeout(() => showPage(2), 500);
+      });
+      balloonContainer.appendChild(balloon);
+    }
+
+    const puzzleContainer = document.getElementById("puzzle");
+    const successMsg = document.getElementById("successMsg");
+    const teaserBox = document.getElementById("teaserBox");
+
+    let dragged;
+
+    function dragStart(e) {
+      dragged = e.target;
+      dragged.classList.add("dragging");
+    }
+
+    function allowDrop(e) { e.preventDefault(); }
+
+    function drop(e) {
+      e.preventDefault();
+      if (dragged !== e.target) {
+        const draggedIndex = dragged.dataset.index;
+        const targetIndex = e.target.dataset.index;
+        [dragged.src, e.target.src] = [e.target.src, dragged.src];
+        [dragged.dataset.index, e.target.dataset.index] = [targetIndex, draggedIndex];
+        checkIfSolved();
+      }
+      dragged.classList.remove("dragging");
+    }
+
+    function checkIfSolved() {
+      const current = Array.from(puzzleContainer.children).map(img => img.dataset.index);
+      const isSolved = current.every((val, i) => val == i);
+      if (isSolved) {
+        successMsg.classList.remove("hidden");
+        successMsg.style.animation = "bounce 0.6s ease-in-out infinite";
+        teaserBox.classList.remove("hidden");
+        confettiBurst();
+      }
+    }
+
+    function confettiBurst() {
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 20, spread: 360, ticks: 60, zIndex: 2000 };
+
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+        confetti(Object.assign({}, defaults, {
+          particleCount: 50,
+          origin: { x: Math.random(), y: Math.random() - 0.2 }
+        }));
+      }, 250);
+    }
+
+    const pieces = [
+      'image_tile_0_0.jpg', 'image_tile_0_1.jpg', 'image_tile_0_2.jpg',
+      'image_tile_1_0.jpg', 'image_tile_1_1.jpg', 'image_tile_1_2.jpg',
+      'image_tile_2_0.jpg', 'image_tile_2_1.jpg', 'image_tile_2_2.jpg'
+    ];
+
+    function shuffleArray(array) {
+      const newArr = [...array];
+      for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+      }
+      return newArr;
+    }
+
+    function resetPuzzle() {
+      puzzleContainer.innerHTML = '';
+      const shuffled = shuffleArray(pieces);
+      shuffled.forEach((src, idx) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.className = "puzzle-piece";
+        img.draggable = true;
+        img.dataset.index = pieces.indexOf(src);
+        img.addEventListener("dragstart", dragStart);
+        img.addEventListener("drop", drop);
+        img.addEventListener("dragover", allowDrop);
+        img.addEventListener("dragenter", e => e.preventDefault());
+        puzzleContainer.appendChild(img);
+      });
+      successMsg.classList.add("hidden");
+      successMsg.style.animation = "none";
+      teaserBox.classList.add("hidden");
+    }
+    function startCountdown() {
+  const countdownEl = document.getElementById("countdown");
+  const revealMsg = document.getElementById("revealMessage");
+  const nextBtn = document.getElementById("goToPage4Btn");
+
+  let timeLeft = 16;
+  countdownEl.textContent = timeLeft;
+
+  const timer = setInterval(() => {
+    timeLeft--;
+    countdownEl.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      countdownEl.classList.add("hidden");
+      revealMsg.classList.remove("hidden");
+      nextBtn.classList.remove("hidden");
+    }
+  }, 1000);
+}
+
+// Automatically start countdown when Page 3 is shown
+function showPage(number) {
+  const wrapper = document.getElementById('sliderWrapper');
+  wrapper.style.transform = `translateX(${(number - 1) * -100}vw)`;
+
+  if (number === 2) resetPuzzle();
+  if (number === 3) startCountdown();
+}
+ // Pause/Play background music when video on Page 4 is playing
+ const video = document.querySelector("video");
+    if (video) {
+      video.addEventListener("play", () => {
+        bgMusic.pause();
+      });
+      video.addEventListener("pause", () => {
+        bgMusic.play();
+      });
+      video.addEventListener("ended", () => {
+        bgMusic.play();
+      });
+    }
+    // Trigger background music on first user interaction
+const bgMusic = document.getElementById("bgMusic");
+let musicStarted = false;
+
+function playMusicOnce() {
+  if (!musicStarted) {
+    bgMusic.play().catch(() => {});
+    musicStarted = true;
+  }
+}
+
+// Attach to any interaction
+document.addEventListener("click", playMusicOnce, { once: true });
+  </script>
+
+</body>
+</html>
