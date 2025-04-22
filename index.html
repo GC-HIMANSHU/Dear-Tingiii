@@ -400,6 +400,55 @@ function playMusicOnce() {
 
 // Attach to any interaction
 document.addEventListener("click", playMusicOnce, { once: true });
+
+
+function addDragEvents(piece) {
+  let offsetX, offsetY;
+
+  const startDrag = (e) => {
+    e.preventDefault();
+    const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+
+    offsetX = clientX - piece.offsetLeft;
+    offsetY = clientY - piece.offsetTop;
+
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", drag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  };
+
+  const drag = (e) => {
+    e.preventDefault();
+    const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+
+    piece.style.left = clientX - offsetX + "px";
+    piece.style.top = clientY - offsetY + "px";
+  };
+
+  const stopDrag = () => {
+    document.removeEventListener("mousemove", drag);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", drag);
+    document.removeEventListener("touchend", stopDrag);
+  };
+
+  piece.addEventListener("mousedown", startDrag);
+  piece.addEventListener("touchstart", startDrag, { passive: false });
+}
+
+shuffled.forEach((src, idx) => {
+  const img = document.createElement("img");
+  img.src = src;
+  img.className = "puzzle-piece";
+  img.draggable = true;
+  img.dataset.index = pieces.indexOf(src);
+  addDragEvents(img);
+  puzzleContainer.appendChild(img);
+});
+
   </script>
 
 </body>
